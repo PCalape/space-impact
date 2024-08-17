@@ -1,0 +1,3 @@
+TODO aesthetics - new object particle - array - background stars
+spawn - with formation
+scoreboard, health bars

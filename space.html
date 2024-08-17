@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById("canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const context = canvas.getContext("2d");
+
+        const bullets = [];
+        const stars = [];
+
+        function Spaceship(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 40;
+            this.color = "yellow"
+
+            this.update = () => {
+                if (keyPressed === "ArrowDown") {
+                    if (this.y > canvas.height) return;
+                    this.y += 5;
+                }
+                if (keyPressed === "ArrowUp") {
+                    if (this.y < 0) return;
+                    this.y -= 5;
+                }
+                if (keyPressed === "ArrowLeft") {
+                    if (this.x < 0) return;
+                    this.x -= 5;
+                }
+                if (keyPressed === "ArrowRight") {
+                    if (this.x > canvas.width / 2) return;
+                    this.x += 5;
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = this.color;
+                context.fill();
+            }
+
+            this.handleHit = () => {
+                this.radius -= 5;
+                if (this.radius <= 20) {
+                    this.color = "red";
+                }
+            }
+        }
+
+        function Star(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 1;
+            this.color = 'white';
+            this.speed = 3;
+
+            this.update = () => {
+                this.x -= this.speed;
+                if (this.x < 0) {
+                    this.x = canvas.width;
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = this.color;
+                context.fill();
+            }
+        }
+
+        function Bullet(x, y) {
+            this.x = x;
+            this.y = y;
+            this.speed = 10;
+            this.radius = 5
+
+            this.update = () => {
+                this.x += this.speed;
+                if (this.x > canvas.width) {
+                    const index = bullets.indexOf(this);
+                    bullets.splice(index, 1);
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = "yellow";
+                context.fill();
+            }
+
+            this.remove = () => {
+                const index = bullets.indexOf(this);
+                bullets.splice(index, 1);
+            }
+        }
+
+        function clearCanvas() {
+            context.beginPath();
+            context.rect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = "black";
+            context.fill();
+        }
+
+        function detectCollision(bullet, target) {
+            if (Math.sqrt(
+                Math.pow(bullet.x - target.x, 2) + 
+                Math.pow(bullet.y - target.y, 2)
+            ) <= target.radius - bullet.radius) {
+                target.handleHit();
+                bullet.remove();
+            }
+        }
+
+        let initSpaceshipPosX = canvas.width * 0.1;
+        let initSpaceshipPosY = canvas.height / 2;
+
+        let keyPressed;
+
+        const spaceship = new Spaceship(initSpaceshipPosX, initSpaceshipPosY);
+
+        for (let x = 0; x < 100; x++) {
+            stars.push(new Star(Math.random() * canvas.width, Math.random() * canvas.height));
+        }
+
+        document.addEventListener("keyup", () => keyPressed = null);
+        document.addEventListener("keydown", (event) => {
+            keyPressed = event.code;
+        });
+
+        document.addEventListener("click", (event) => {
+            const bullet = new Bullet(spaceship.x, spaceship.y);
+            bullets.push(bullet);
+        });
+
+        function animate() {
+            clearCanvas();
+
+            spaceship.update();
+            spaceship.draw();
+            
+            bullets.forEach(bullet => {
+                bullet.update();
+                bullet.draw();
+            })
+
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            })
+
+            setTimeout(animate, 1000 / 60);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
