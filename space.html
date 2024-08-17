@@ -24,6 +24,7 @@
 
         const bullets = [];
         const stars = [];
+        const spawns = [];
         let mouseX = 0;
         let mouseY = 0;
 
@@ -58,10 +59,7 @@
             }
 
             this.handleHit = () => {
-                this.radius -= 5;
-                if (this.radius <= 20) {
-                    this.color = "red";
-                }
+                this.color = "red";
             }
         }
 
@@ -96,8 +94,7 @@
             this.update = () => {
                 this.x += this.speed;
                 if (this.x > canvas.width) {
-                    const index = bullets.indexOf(this);
-                    bullets.splice(index, 1);
+                    this.remove();
                 }
             }
 
@@ -110,7 +107,41 @@
 
             this.remove = () => {
                 const index = bullets.indexOf(this);
-                bullets.splice(index, 1);
+                bullets[index] = bullets[bullets.length - 1];
+                bullets.pop();
+            }
+        }
+
+        function Spawn(x, y, level) {
+            this.x = x;
+            this.y = y;
+            this.level = level;
+            this.speed = 4;
+            this.radius = 50
+            this.color = 'skyblue';
+
+            this.update = () => {
+                this.x -= this.speed;
+                if (this.x < -this.radius) {
+                    this.remove();
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = this.color;
+                context.fill();
+            }
+
+            this.remove = () => {
+                const index = spawns.indexOf(this);
+                spawns[index] = spawns[spawns.length - 1];
+                spawns.pop();
+            }
+
+            this.handleHit = () => {
+                this.remove();  
             }
         }
 
@@ -121,13 +152,13 @@
             context.fill();
         }
 
-        function detectCollision(bullet, target) {
+        function handleCollision(object, target) {
             if (Math.sqrt(
-                Math.pow(bullet.x - target.x, 2) + 
-                Math.pow(bullet.y - target.y, 2)
-            ) <= target.radius - bullet.radius) {
+                Math.pow(object.x - target.x, 2) + 
+                Math.pow(object.y - target.y, 2)
+            ) <= target.radius - object.radius) {
                 target.handleHit();
-                bullet.remove();
+                object.remove();
             }
         }
 
@@ -153,18 +184,33 @@
         function animate() {
             clearCanvas();
 
-            spaceship.update();
-            spaceship.draw();
-            
-            bullets.forEach(bullet => {
-                bullet.update();
-                bullet.draw();
-            })
-
             stars.forEach(star => {
                 star.update();
                 star.draw();
             })
+            
+            bullets.forEach(bullet => {
+                bullet.update();
+                bullet.draw();
+                spawns.forEach(spawn => {
+                    handleCollision(bullet, spawn);
+                })
+            })
+
+            if (spawns.length < 1) {
+                spawns.push(new Spawn(canvas.width + 150 + Math.random() * 500, Math.random() * canvas.height, 1));
+            }
+
+            spawns.forEach(spawn => {
+                spawn.update();
+                spawn.draw();
+                console.log(spawn.x, spawn.y);
+                console.log(spaceship.x, spaceship.y);
+                handleCollision(spawn, spaceship);
+            })
+
+            spaceship.update();
+            spaceship.draw();
 
             setTimeout(animate, 1000 / 60);
         }
