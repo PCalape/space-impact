@@ -24,29 +24,29 @@
 
         const bullets = [];
         const stars = [];
+        let mouseX = 0;
+        let mouseY = 0;
 
         function Spaceship(x, y) {
             this.x = x;
             this.y = y;
             this.radius = 40;
-            this.color = "yellow"
+            this.color = "yellow";
+            this.speed = 8;
+            this.tolerance = 10;
 
             this.update = () => {
-                if (keyPressed.includes("ArrowDown")) {
-                    if (this.y > canvas.height) return;
-                    this.y += 5;
+                if (this.x - mouseX < -this.tolerance) {
+                    this.x += this.speed;
                 }
-                if (keyPressed.includes("ArrowUp")) {
-                    if (this.y < 0) return;
-                    this.y -= 5;
+                if (this.x - mouseX > this.tolerance) {
+                    this.x -= this.speed;
                 }
-                if (keyPressed.includes("ArrowLeft")) {
-                    if (this.x < 0) return;
-                    this.x -= 5;
+                if (this.y - mouseY < -this.tolerance) {
+                    this.y += this.speed;
                 }
-                if (keyPressed.includes("ArrowRight")) {
-                    if (this.x > canvas.width / 2) return;
-                    this.x += 5;
+                if (this.y - mouseY > this.tolerance) {
+                    this.y -= this.speed;
                 }
             }
 
@@ -134,19 +134,15 @@
         let initSpaceshipPosX = canvas.width * 0.1;
         let initSpaceshipPosY = canvas.height / 2;
 
-        let keyPressed = [];
-
         const spaceship = new Spaceship(initSpaceshipPosX, initSpaceshipPosY);
 
         for (let x = 0; x < 100; x++) {
             stars.push(new Star(Math.random() * canvas.width, Math.random() * canvas.height));
         }
 
-        document.addEventListener("keyup", (event) => keyPressed.splice(event.code, 1));
-        document.addEventListener("keydown", (event) => {
-            if (!keyPressed.includes(event.code)) {
-                keyPressed.push(event.code);
-            }
+        document.addEventListener("mousemove", (event) => {
+            mouseX = event.x;
+            mouseY = event.y;
         });
 
         document.addEventListener("click", (event) => {
