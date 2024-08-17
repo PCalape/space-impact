@@ -4,7 +4,14 @@ Must Have
 - spawn formations
 - hp bar
 - points
+- distance
+
+Good to Have
+- gas
+- boss
 
 Nice to Have
 - stars nga pareha ka Japeth
 - add momentum
+- boss
+- leaderboards
