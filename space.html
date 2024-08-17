@@ -32,19 +32,19 @@
             this.color = "yellow"
 
             this.update = () => {
-                if (keyPressed === "ArrowDown") {
+                if (keyPressed.includes("ArrowDown")) {
                     if (this.y > canvas.height) return;
                     this.y += 5;
                 }
-                if (keyPressed === "ArrowUp") {
+                if (keyPressed.includes("ArrowUp")) {
                     if (this.y < 0) return;
                     this.y -= 5;
                 }
-                if (keyPressed === "ArrowLeft") {
+                if (keyPressed.includes("ArrowLeft")) {
                     if (this.x < 0) return;
                     this.x -= 5;
                 }
-                if (keyPressed === "ArrowRight") {
+                if (keyPressed.includes("ArrowRight")) {
                     if (this.x > canvas.width / 2) return;
                     this.x += 5;
                 }
@@ -134,7 +134,7 @@
         let initSpaceshipPosX = canvas.width * 0.1;
         let initSpaceshipPosY = canvas.height / 2;
 
-        let keyPressed;
+        let keyPressed = [];
 
         const spaceship = new Spaceship(initSpaceshipPosX, initSpaceshipPosY);
 
@@ -142,9 +142,11 @@
             stars.push(new Star(Math.random() * canvas.width, Math.random() * canvas.height));
         }
 
-        document.addEventListener("keyup", () => keyPressed = null);
+        document.addEventListener("keyup", (event) => keyPressed.splice(event.code, 1));
         document.addEventListener("keydown", (event) => {
-            keyPressed = event.code;
+            if (!keyPressed.includes(event.code)) {
+                keyPressed.push(event.code);
+            }
         });
 
         document.addEventListener("click", (event) => {

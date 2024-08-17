@@ -1,3 +1,10 @@
-TODO aesthetics - new object particle - array - background stars
-spawn - with formation
-scoreboard, health bars
+TODO 
+Must Have
+- spawn
+- spawn formations
+- hp bar
+- points
+
+Nice to Have
+- stars nga pareha ka Japeth
+- add momentum
