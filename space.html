@@ -28,6 +28,7 @@
         let mouseX = 0;
         let mouseY = 0;
         let isGameOver = false;
+        let mapLevel = 1;
 
         function Spaceship(x, y) {
             this.x = x;
@@ -71,9 +72,9 @@
             }
 
             this.drawHealth = () => {
-                context.font = "30px Arial";
-                context.fillStyle = "white";
-                context.fillText("Health: " + this.health, 10, 30);
+                context.font = "bold 15px Courier";
+                context.fillStyle = "red";
+                context.fillText("❤️".repeat(this.health), this.x - 0.7 * this.radius, this.y - 1.2* this.radius);
             }
         }
 
@@ -131,11 +132,13 @@
             this.y = y;
             this.level = level;
             this.speed = 4;
-            this.radius = 50
-            this.color = 'skyblue';
+            this.radius = Math.max(50 - (this.level - 1) * 5, 10);
+            this.color = ["skyblue", "blue", "green", "red", "violet", "white", "gray"][level - 1] ?? "black";
+            this.health = level;
+            this.alpha = 1;
 
             this.update = () => {
-                this.x -= this.speed;
+                this.x -= this.speed + this.level - 1;
                 if (this.x < -this.radius) {
                     this.remove();
                 }
@@ -145,6 +148,7 @@
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = this.color;
+                context.globalAlpha = this.alpha;
                 context.fill();
                 context.strokeStyle = "blue";
                 context.stroke();
@@ -157,7 +161,11 @@
             }
 
             this.handleHit = () => {
-                this.remove();  
+                this.health--;
+                this.alpha -= 0.2;
+                if (this.health <= 0) {
+                    this.remove();
+                }
             }
         }
 
@@ -177,6 +185,14 @@
                 object.remove();
             }
         }
+
+        function increaseLevel() {
+            setInterval(() => {
+                mapLevel++;
+            }, 30000);
+        }
+
+        increaseLevel();
 
         let initSpaceshipPosX = canvas.width * 0.1;
         let initSpaceshipPosY = canvas.height / 2;
@@ -213,8 +229,8 @@
                 })
             })
 
-            if (spawns.length < 10) {
-                spawns.push(new Spawn(1.2 * canvas.width + Math.random() * canvas.width * 0.3, Math.random() * canvas.height, 1));
+            if (spawns.filter(spawn => spawn.level === mapLevel).length < 10 + mapLevel * 3) {
+                spawns.push(new Spawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
             }
 
             spawns.forEach(spawn => {
