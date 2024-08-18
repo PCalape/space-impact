@@ -27,6 +27,7 @@
         const spawns = [];
         let mouseX = 0;
         let mouseY = 0;
+        let isGameOver = false;
 
         function Spaceship(x, y) {
             this.x = x;
@@ -35,6 +36,7 @@
             this.color = "yellow";
             this.speed = 8;
             this.tolerance = 10;
+            this.health = 3;
 
             this.update = () => {
                 if (this.x - mouseX < -this.tolerance) {
@@ -56,10 +58,22 @@
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = this.color;
                 context.fill();
+                context.strokeStyle = "orange";
+                context.stroke();
             }
 
             this.handleHit = () => {
-                this.color = "red";
+                this.health--;
+                if (this.health <= 0) {
+                    this.color = "red";
+                    isGameOver = true;
+                }
+            }
+
+            this.drawHealth = () => {
+                context.font = "30px Arial";
+                context.fillStyle = "white";
+                context.fillText("Health: " + this.health, 10, 30);
             }
         }
 
@@ -132,6 +146,8 @@
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = this.color;
                 context.fill();
+                context.strokeStyle = "blue";
+                context.stroke();
             }
 
             this.remove = () => {
@@ -156,7 +172,7 @@
             if (Math.sqrt(
                 Math.pow(object.x - target.x, 2) + 
                 Math.pow(object.y - target.y, 2)
-            ) <= target.radius - object.radius) {
+            ) <= target.radius + object.radius) {
                 target.handleHit();
                 object.remove();
             }
@@ -197,20 +213,27 @@
                 })
             })
 
-            if (spawns.length < 1) {
-                spawns.push(new Spawn(canvas.width + 150 + Math.random() * 500, Math.random() * canvas.height, 1));
+            if (spawns.length < 10) {
+                spawns.push(new Spawn(1.2 * canvas.width + Math.random() * canvas.width * 0.3, Math.random() * canvas.height, 1));
             }
 
             spawns.forEach(spawn => {
                 spawn.update();
                 spawn.draw();
-                console.log(spawn.x, spawn.y);
-                console.log(spaceship.x, spaceship.y);
                 handleCollision(spawn, spaceship);
             })
 
             spaceship.update();
             spaceship.draw();
+            spaceship.drawHealth();
+            
+            if (isGameOver) {
+                setTimeout(() => {
+                    alert("Game Over");
+                    location.reload();
+                }, 200);
+                return;
+            }
 
             setTimeout(animate, 1000 / 60);
         }
