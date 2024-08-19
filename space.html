@@ -23,12 +23,16 @@
         const context = canvas.getContext("2d");
 
         const bullets = [];
+        const bossBullets = [];
         const stars = [];
         const spawns = [];
         let mouseX = 0;
         let mouseY = 0;
         let isGameOver = false;
         let mapLevel = 1;
+        let mapLevelInterval = 1800;
+        let mapLevelIntervalCounter = 0;
+
         let score = 0;
 
         function Spaceship(x, y) {
@@ -195,14 +199,6 @@
             context.fillText(`Score: ${score}`, 10, 20);
         }
 
-        function increaseLevel() {
-            setInterval(() => {
-                mapLevel++;
-            }, 30000);
-        }
-
-        increaseLevel();
-
         let initSpaceshipPosX = canvas.width * 0.1;
         let initSpaceshipPosY = canvas.height / 2;
 
@@ -253,6 +249,13 @@
             spaceship.update();
             spaceship.draw();
             spaceship.drawHealth();
+
+            mapLevelIntervalCounter++;
+            if (mapLevelIntervalCounter >= mapLevelInterval) {
+                mapLevel++;
+                mapLevelIntervalCounter = 0;
+                mapLevelInterval += 900;
+            }
             
             if (isGameOver) {
                 setTimeout(() => {
