@@ -196,7 +196,7 @@
         function printScore() {
             context.font = "bold 20px Courier";
             context.fillStyle = "white";
-            context.fillText(`Score: ${score}`, 10, 20);
+            context.fillText(`Score: ${score.toFixed(2)}`, 10, 20);
         }
 
         let initSpaceshipPosX = canvas.width * 0.1;
@@ -256,6 +256,7 @@
                 mapLevelIntervalCounter = 0;
                 mapLevelInterval += 900;
             }
+            score += 0.001 * mapLevel;
             
             if (isGameOver) {
                 setTimeout(() => {
