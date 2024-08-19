@@ -136,14 +136,14 @@
             this.x = x;
             this.y = y;
             this.level = level;
-            this.speed = 4;
+            this.speed = 4 + level - 1 + Math.random() * 0.2;
             this.radius = Math.max(50 - (level - 1) * 5, 10);
             this.color = ["skyblue", "blue", "green", "red", "violet", "white", "gray"][level - 1] ?? "black";
             this.health = level;
             this.alpha = 1;
 
             this.update = () => {
-                this.x -= this.speed + this.level - 1;
+                this.x -= this.speed;
                 if (this.x < -this.radius) {
                     this.remove();
                 }
