@@ -156,9 +156,6 @@
             }
 
             this.remove = () => {
-                // const index = spawns.indexOf(this);
-                // spawns[index] = spawns[spawns.length - 1];
-                // spawns.pop();
                 this.alpha = 1;
                 this.health = this.level;
                 this.x = canvas.width + Math.random() * canvas.width * 0.7;
@@ -167,7 +164,7 @@
 
             this.handleHit = () => {
                 this.health--;
-                this.alpha -= 0.2;
+                this.alpha = this.health / this.level;
                 if (this.health <= 0) {
                     score += this.level;
                     this.remove();
