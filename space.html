@@ -34,6 +34,7 @@
         let mouseHold = false;
         let mouseHoldCounter = 0;
         let powerUpLevel = 0;
+        let shieldUp = false;
 
         let score = 0;
 
@@ -172,22 +173,24 @@
             }
         }
 
-        function RotatingBullet(x, y, speed, distanceFromSpaceship, radius) {
+        function RotatingBullet(x, y, initAngle, speed, distanceFromSpaceship, radius) {
             this.x = x;
             this.y = y;
             this.speed = speed;
             this.radius = radius;
             this.distanceFromSpaceship = distanceFromSpaceship;
+            this.angle = initAngle;
 
             this.update = () => {
-                this.x = spaceship.x + this.distanceFromSpaceship * Math.cos(this.speed);
-                this.y = spaceship.y + this.distanceFromSpaceship * Math.sin(this.speed);
+                this.angle += this.speed;
+                this.x = spaceship.x + Math.cos(this.angle) * this.distanceFromSpaceship;
+                this.y = spaceship.y + Math.sin(this.angle) * this.distanceFromSpaceship;
             }
 
             this.draw = () => {
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-                context.fillStyle = "yellow";
+                context.fillStyle = "orange";
                 context.globalAlpha = 1;
                 context.fill();
             }
@@ -317,7 +320,7 @@
             mouseHold = true;
             const bullet = new Bullet(spaceship.x, spaceship.y);
             bullets.push(bullet);
-            if (powerUpLevel > 0) {
+            if (powerUpLevel > 1) {
                 const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
                 const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
                 bullets.push(bulletDown, bulletUp);
@@ -361,9 +364,10 @@
             spaceship.draw();
             spaceship.drawHealth();
 
+            
+            powerUp?.update();
+            powerUp?.draw();
             if (powerUp) {
-                powerUp.update();
-                powerUp.draw();
                 handleCollision(spaceship, powerUp);
             }
 
@@ -373,12 +377,6 @@
                 if (mouseHoldCounter % 10 === 0) {
                     const bullet = new Bullet(spaceship.x, spaceship.y);
                     bullets.push(bullet);
-                    if (powerUpLevel = 0) {
-                        for (let i = 0; i < 5; i++) {
-                            const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 50, 5);
-                            bullets.push(bullet);
-                        }
-                    }
                     if (powerUpLevel > 1) {
                         const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
                         const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
@@ -386,6 +384,15 @@
                     }
                 }
             }
+
+            if (powerUpLevel === 1 && !shieldUp) {
+                for (let i = 0; i < 3; i++) {
+                    const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10);
+                    bullets.push(bullet);
+                }
+                shieldUp = true;
+            }
+
             if (counter >= mapLevelInterval) {
                 mapLevel++;
                 powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
@@ -402,7 +409,9 @@
                 return;
             }
 
-            requestAnimationFrame(animate);
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, 1000 / 60);
         }
 
         animate();
