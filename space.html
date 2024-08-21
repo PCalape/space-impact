@@ -63,6 +63,7 @@
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = this.color;
+                context.globalAlpha = 1;
                 context.fill();
                 context.strokeStyle = "orange";
                 context.stroke();
@@ -79,6 +80,7 @@
             this.drawHealth = () => {
                 context.font = "bold 15px Courier";
                 context.fillStyle = "red";
+                context.globalAlpha = 1;
                 context.fillText("❤️".repeat(this.health), this.x - 0.7 * this.radius, this.y - 1.2* this.radius);
             }
         }
@@ -101,6 +103,7 @@
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = this.color;
+                context.globalAlpha = 1;
                 context.fill();
             }
         }
@@ -122,6 +125,7 @@
                 context.beginPath();
                 context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
                 context.fillStyle = "yellow";
+                context.globalAlpha = 1;
                 context.fill();
             }
 
@@ -180,6 +184,7 @@
             context.beginPath();
             context.rect(0, 0, canvas.width, canvas.height);
             context.fillStyle = "black";
+            context.globalAlpha = 1;
             context.fill();
         }
 
@@ -196,6 +201,7 @@
         function printScore() {
             context.font = "bold 20px Courier";
             context.fillStyle = "white";
+            context.globalAlpha = 1;
             context.fillText(`Score: ${score.toFixed(2)}`, 10, 20);
         }
 
