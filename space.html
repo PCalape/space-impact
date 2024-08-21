@@ -23,7 +23,6 @@
         const context = canvas.getContext("2d");
 
         const bullets = [];
-        const bossBullets = [];
         const stars = [];
         const spawns = [];
         let mouseX = 0;
@@ -34,6 +33,7 @@
         let counter = 0;
         let mouseHold = false;
         let mouseHoldCounter = 0;
+        let powerUpLevel = 0;
 
         let score = 0;
 
@@ -84,6 +84,10 @@
                 context.fillStyle = "red";
                 context.globalAlpha = 1;
                 context.fillText("❤️".repeat(this.health), this.x - 0.7 * this.radius, this.y - 1.2* this.radius);
+            }
+
+            this.remove = () => {
+                // do nothing
             }
         }
 
@@ -138,6 +142,61 @@
             }
         }
 
+        function AngledBullet(x, y, angle) {
+            this.x = x;
+            this.y = y;
+            this.speed = 10;
+            this.radius = 5;
+            this.angle = angle;
+
+            this.update = () => {
+                this.x += this.speed;
+                this.y += this.speed * Math.sin(this.angle);
+                if (this.x > canvas.width || this.y > canvas.height || this.y < 0) {
+                    this.remove();
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = "yellow";
+                context.globalAlpha = 1;
+                context.fill();
+            }
+
+            this.remove = () => {
+                const index = bullets.indexOf(this);
+                bullets[index] = bullets[bullets.length - 1];
+                bullets.pop();
+            }
+        }
+
+        function RotatingBullet(x, y, speed, distanceFromSpaceship, radius) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.radius = radius;
+            this.distanceFromSpaceship = distanceFromSpaceship;
+
+            this.update = () => {
+                this.x = spaceship.x + this.distanceFromSpaceship * Math.cos(this.speed);
+                this.y = spaceship.y + this.distanceFromSpaceship * Math.sin(this.speed);
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = "yellow";
+                context.globalAlpha = 1;
+                context.fill();
+            }
+
+            this.remove = () => {
+                // do nothing
+            }
+        }
+
         function Spawn(x, y, level) {
             this.x = x;
             this.y = y;
@@ -182,6 +241,37 @@
             }
         }
 
+        function PowerUp(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 10;
+            this.speed = 10;
+
+            this.update = () => {
+                this.x -= this.speed;
+                if (this.x < -this.radius) {
+                    this.remove();
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                context.globalAlpha = 1;
+                context.fill();
+            }
+
+            this.remove = () => {
+                powerUp = null;
+            }
+
+            this.handleHit = () => {
+                powerUpLevel++;
+                this.remove();
+            }
+        }
+
         function clearCanvas() {
             context.beginPath();
             context.rect(0, 0, canvas.width, canvas.height);
@@ -216,6 +306,8 @@
             stars.push(new Star(Math.random() * canvas.width, Math.random() * canvas.height));
         }
 
+        let powerUp;
+
         document.addEventListener("mousemove", (event) => {
             mouseX = event.x;
             mouseY = event.y;
@@ -225,6 +317,11 @@
             mouseHold = true;
             const bullet = new Bullet(spaceship.x, spaceship.y);
             bullets.push(bullet);
+            if (powerUpLevel > 0) {
+                const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
+                const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
+                bullets.push(bulletDown, bulletUp);
+            }
         });
 
         document.addEventListener("mouseup", (event) => {
@@ -264,16 +361,34 @@
             spaceship.draw();
             spaceship.drawHealth();
 
+            if (powerUp) {
+                powerUp.update();
+                powerUp.draw();
+                handleCollision(spaceship, powerUp);
+            }
+
             counter++;
             if (mouseHold) {
                 mouseHoldCounter++;
                 if (mouseHoldCounter % 10 === 0) {
                     const bullet = new Bullet(spaceship.x, spaceship.y);
                     bullets.push(bullet);
+                    if (powerUpLevel = 0) {
+                        for (let i = 0; i < 5; i++) {
+                            const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 50, 5);
+                            bullets.push(bullet);
+                        }
+                    }
+                    if (powerUpLevel > 1) {
+                        const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
+                        const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
+                        bullets.push(bulletDown, bulletUp);
+                    }
                 }
             }
             if (counter >= mapLevelInterval) {
                 mapLevel++;
+                powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
                 counter = 0;
                 mapLevelInterval += 900;
             }
