@@ -31,7 +31,9 @@
         let isGameOver = false;
         let mapLevel = 1;
         let mapLevelInterval = 1800;
-        let mapLevelIntervalCounter = 0;
+        let counter = 0;
+        let mouseHold = false;
+        let mouseHoldCounter = 0;
 
         let score = 0;
 
@@ -219,9 +221,15 @@
             mouseY = event.y;
         });
 
-        document.addEventListener("click", (event) => {
+        document.addEventListener("mousedown", (event) => {
+            mouseHold = true;
             const bullet = new Bullet(spaceship.x, spaceship.y);
             bullets.push(bullet);
+        });
+
+        document.addEventListener("mouseup", (event) => {
+            mouseHold = false;
+            mouseHoldCounter = 0;
         });
 
         function animate() {
@@ -256,10 +264,17 @@
             spaceship.draw();
             spaceship.drawHealth();
 
-            mapLevelIntervalCounter++;
-            if (mapLevelIntervalCounter >= mapLevelInterval) {
+            counter++;
+            if (mouseHold) {
+                mouseHoldCounter++;
+                if (mouseHoldCounter % 10 === 0) {
+                    const bullet = new Bullet(spaceship.x, spaceship.y);
+                    bullets.push(bullet);
+                }
+            }
+            if (counter >= mapLevelInterval) {
                 mapLevel++;
-                mapLevelIntervalCounter = 0;
+                counter = 0;
                 mapLevelInterval += 900;
             }
             score += 0.001 * mapLevel;
