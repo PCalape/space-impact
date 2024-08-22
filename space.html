@@ -364,11 +364,11 @@
             if (mouseHold) {
                 mouseHoldCounter++;
                 if (mouseHoldCounter % 10 === 0) {
-                    const bullet = new Bullet(spaceship.x, spaceship.y);
+                    const bullet = new Bullet(spaceship.x + spaceship.radius, spaceship.y);
                     bullets.push(bullet);
                     if (powerUpLevel > 1) {
-                        const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
-                        const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
+                        const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 30 / 360 * Math.PI);
+                        const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
                         bullets.push(bulletDown, bulletUp);
                     }
                 }
