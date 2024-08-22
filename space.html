@@ -401,11 +401,11 @@
                 }, 0);
                 return;
             }
+
+            setTimeout(requestAnimationFrame(animate), 1000 / 60);
         }
 
-        setInterval(() => {
-            requestAnimationFrame(animate);
-        }, 1000 / 60);
+        animate();
     </script>
 </body>
 </html>
