@@ -137,9 +137,7 @@
             }
 
             this.remove = () => {
-                const index = bullets.indexOf(this);
-                bullets[index] = bullets[bullets.length - 1];
-                bullets.pop();
+                bullets.splice(bullets.indexOf(this), 1);
             }
         }
 
@@ -167,9 +165,7 @@
             }
 
             this.remove = () => {
-                const index = bullets.indexOf(this);
-                bullets[index] = bullets[bullets.length - 1];
-                bullets.pop();
+                bullets.splice(bullets.indexOf(this), 1);
             }
         }
 
@@ -318,13 +314,6 @@
 
         document.addEventListener("mousedown", (event) => {
             mouseHold = true;
-            const bullet = new Bullet(spaceship.x, spaceship.y);
-            bullets.push(bullet);
-            if (powerUpLevel > 1) {
-                const bulletDown = new AngledBullet(spaceship.x, spaceship.y, 30 / 360 * Math.PI);
-                const bulletUp = new AngledBullet(spaceship.x, spaceship.y, -30 / 360 * Math.PI);
-                bullets.push(bulletDown, bulletUp);
-            }
         });
 
         document.addEventListener("mouseup", (event) => {
@@ -402,10 +391,12 @@
             score += 0.001 * mapLevel;
             
             if (isGameOver) {
+                spaceship.health = 99999;
+                isGameOver = false;
                 setTimeout(() => {
                     alert("Game Over");
                     location.reload();
-                }, 200);
+                }, 0);
                 return;
             }
         }
