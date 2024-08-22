@@ -44,17 +44,17 @@
             this.radius = 40;
             this.color = "yellow";
             this.speed = 8;
-            this.tolerance = 10;
+            this.tolerance = 0;
             this.health = 3;
 
             this.update = () => {
-                if (this.x - mouseX < -this.tolerance) {
+                if (this.x - mouseX < this.tolerance) {
                     this.x += this.speed;
                 }
                 if (this.x - mouseX > this.tolerance) {
                     this.x -= this.speed;
                 }
-                if (this.y - mouseY < -this.tolerance) {
+                if (this.y - mouseY < this.tolerance) {
                     this.y += this.speed;
                 }
                 if (this.y - mouseY > this.tolerance) {
@@ -391,7 +391,6 @@
             score += 0.001 * mapLevel;
             
             if (isGameOver) {
-                spaceship.health = 99999;
                 isGameOver = false;
                 setTimeout(() => {
                     alert("Game Over");
