@@ -63,6 +63,12 @@
                 if (deltaY > this.tolerance) {
                     this.y -= this.speed / divider;
                 }
+                if (this.x < 0) {
+                    this.x = 0;
+                }
+                if (this.y < 0) {
+                    this.y = 0;
+                }
             }
 
             this.draw = () => {
