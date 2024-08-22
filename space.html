@@ -44,21 +44,24 @@
             this.radius = 40;
             this.color = "yellow";
             this.speed = 8;
-            this.tolerance = 0;
+            this.tolerance = 20;
             this.health = 3;
 
             this.update = () => {
-                if (this.x - mouseX < this.tolerance) {
-                    this.x += this.speed;
+                const deltaX = this.x - mouseX;
+                const deltaY = this.y - mouseY;
+                const divider = Math.abs(deltaX) > this.tolerance && Math.abs(deltaY) > this.tolerance ? Math.SQRT2 : 1;
+                if (deltaX < -this.tolerance) {
+                    this.x += this.speed / divider;
                 }
-                if (this.x - mouseX > this.tolerance) {
-                    this.x -= this.speed;
+                if (deltaX > this.tolerance) {
+                    this.x -= this.speed / divider;
                 }
-                if (this.y - mouseY < this.tolerance) {
-                    this.y += this.speed;
+                if (deltaY < -this.tolerance) {
+                    this.y += this.speed / divider;
                 }
-                if (this.y - mouseY > this.tolerance) {
-                    this.y -= this.speed;
+                if (deltaY > this.tolerance) {
+                    this.y -= this.speed / divider;
                 }
             }
 
