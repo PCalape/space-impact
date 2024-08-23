@@ -488,10 +488,20 @@
                             const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
                             bullets.push(bulletDown, bulletUp);
                         }
+                        if (powerUpLevel > 5) {
+                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 60 / 360 * Math.PI);
+                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -60 / 360 * Math.PI);
+                            bullets.push(bulletDown, bulletUp);
+                        }
+                        if (powerUpLevel > 6) {
+                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 90 / 360 * Math.PI);
+                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -90 / 360 * Math.PI);
+                            bullets.push(bulletDown, bulletUp);
+                        }
                     }
                 }
 
-                if (powerUpLevel === 1 && !shieldUp) {
+                if (powerUpLevel > 0 && !shieldUp) {
                     for (let i = 0; i < 3; i++) {
                         const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10, 1);
                         bullets.push(bullet);
@@ -499,7 +509,7 @@
                     shieldUp = true;
                 }
 
-                if (powerUpLevel === 3 && !upgradedShieldUp) {
+                if (powerUpLevel > 2 && !upgradedShieldUp) {
                     for (let i = 0; i < 5; i++) {
                         const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 0.075, 150, 15, 0);
                         bullets.push(bullet);
@@ -507,7 +517,7 @@
                     upgradedShieldUp = true;
                 }
 
-                if (powerUpLevel === 5 && !lastUpgradedShield) {
+                if (powerUpLevel > 4 && !lastUpgradedShield) {
                     for (let i = 0; i < 7; i++) {
                         const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 7, 0.05, 200, 20, 1);
                         bullets.push(bullet);
