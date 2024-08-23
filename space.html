@@ -22,7 +22,7 @@
 
         const context = canvas.getContext("2d");
 
-        const bullets = [];
+        let bullets = [];
         const stars = [];
         const spawns = [];
         let mouseX = 0;
@@ -39,6 +39,8 @@
         let fps = 1000 / 60;
         let upgradedShieldUp = false;
         let lastUpgradedShield = false;
+        const omegaBulletRate = 2 * 60;
+        let omegaBulletRateCounter = 0;
 
         let score = 0;
 
@@ -196,7 +198,7 @@
             }
 
             this.remove = () => {
-                bullets.splice(bullets.indexOf(this), 1);
+                delete bullets[bullets.indexOf(this)];
             }
         }
 
@@ -224,7 +226,7 @@
             }
 
             this.remove = () => {
-                bullets.splice(bullets.indexOf(this), 1);
+                delete bullets[bullets.indexOf(this)];
             }
         }
 
@@ -253,6 +255,44 @@
                 context.fillStyle = "orange";
                 context.globalAlpha = 1;
                 context.fill();
+            }
+
+            this.remove = () => {
+                // do nothing
+            }
+        }
+
+        function OmegaBullet() {
+            this.x = spaceship.x;
+            this.y = spaceship.y;
+            this.speed = 7;
+            this.radiusGrowth = 1;
+            this.radius = spaceship.radius;
+            this.maxRadius = 100;
+
+            this.update = () => {
+                if (this.radius < this.maxRadius) {
+                    this.radius += this.radiusGrowth;
+                    this.x = spaceship.x;
+                    this.y = spaceship.y;
+                } else {
+                    this.x += this.speed;
+                    if (this.x > canvas.width + this.radius) {
+                        this.removeOmega();
+                    }
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = "gold";
+                context.globalAlpha = 1;
+                context.fill();
+            }
+
+            this.removeOmega = () => {
+                delete bullets[bullets.indexOf(this)];
             }
 
             this.remove = () => {
@@ -475,12 +515,23 @@
                     lastUpgradedShield = true;
                 }
 
+                if (powerUpLevel > 3) {
+                    if (omegaBulletRateCounter % omegaBulletRate === 0) {
+                        omegaBulletRateCounter = 0;
+                        bullets.push(new OmegaBullet());
+                    }
+                    omegaBulletRateCounter++;
+                }
+
                 if (counter >= mapLevelInterval) {
                     mapLevel++;
                     powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
                     counter = 0;
                     mapLevelInterval += 900;
                 }
+
+                bullets = bullets.filter(bullet => bullet);
+
                 score += 0.001 * mapLevel;
                 
                 if (isGameOver) {
