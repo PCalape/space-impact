@@ -37,6 +37,8 @@
         let shieldUp = false;
         let animationTime = new Date().getTime();
         let fps = 1000 / 60;
+        let upgradedShieldUp = false;
+        let lastUpgradedShield = false;
 
         let score = 0;
 
@@ -226,16 +228,21 @@
             }
         }
 
-        function RotatingBullet(x, y, initAngle, speed, distanceFromSpaceship, radius) {
+        function RotatingBullet(x, y, initAngle, speed, distanceFromSpaceship, radius, direction) {
             this.x = x;
             this.y = y;
             this.speed = speed;
             this.radius = radius;
             this.distanceFromSpaceship = distanceFromSpaceship;
             this.angle = initAngle;
+            this.direction = direction;
 
             this.update = () => {
-                this.angle += this.speed;
+                if (this.direction === 1) {
+                    this.angle += this.speed;
+                } else {
+                    this.angle -= this.speed;
+                }
                 this.x = spaceship.x + Math.cos(this.angle) * this.distanceFromSpaceship;
                 this.y = spaceship.y + Math.sin(this.angle) * this.distanceFromSpaceship;
             }
@@ -446,10 +453,26 @@
 
                 if (powerUpLevel === 1 && !shieldUp) {
                     for (let i = 0; i < 3; i++) {
-                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10);
+                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10, 1);
                         bullets.push(bullet);
                     }
                     shieldUp = true;
+                }
+
+                if (powerUpLevel === 3 && !upgradedShieldUp) {
+                    for (let i = 0; i < 5; i++) {
+                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 0.075, 150, 15, 0);
+                        bullets.push(bullet);
+                    }
+                    upgradedShieldUp = true;
+                }
+
+                if (powerUpLevel === 5 && !lastUpgradedShield) {
+                    for (let i = 0; i < 7; i++) {
+                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 7, 0.05, 200, 20, 1);
+                        bullets.push(bullet);
+                    }
+                    lastUpgradedShield = true;
                 }
 
                 if (counter >= mapLevelInterval) {
