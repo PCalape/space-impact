@@ -269,6 +269,7 @@
             this.radiusGrowth = 1;
             this.radius = spaceship.radius;
             this.maxRadius = 100;
+            this.damage = 0.2;
 
             this.update = () => {
                 if (this.radius < this.maxRadius) {
@@ -334,8 +335,8 @@
                 this.y = Math.random() * canvas.height;
             }
 
-            this.handleHit = () => {
-                this.health--;
+            this.handleHit = (damage) => {
+                this.health -= damage;
                 this.alpha = this.health / this.level;
                 if (this.health <= 0) {
                     score += this.level;
@@ -388,7 +389,7 @@
                 Math.pow(object.x - target.x, 2) + 
                 Math.pow(object.y - target.y, 2)
             ) <= target.radius + object.radius) {
-                target.handleHit();
+                target.handleHit(object.damage ?? 1);
                 object.remove();
             }
         }
