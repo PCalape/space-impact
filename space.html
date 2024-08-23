@@ -35,6 +35,8 @@
         let mouseHoldCounter = 9;
         let powerUpLevel = 0;
         let shieldUp = false;
+        let animationTime = new Date().getTime();
+        let fps = 1000 / 60;
 
         let score = 0;
 
@@ -331,84 +333,88 @@
         });
 
         function animate() {
-            clearCanvas();
+            requestAnimationFrame(animate);
+            const now = new Date().getTime();
+            const elapsedTime = now - animationTime;
+            if (elapsedTime > fps) {
+                animationTime = now - (elapsedTime % (fps));
+                clearCanvas();
 
-            stars.forEach(star => {
-                star.update();
-                star.draw();
-            })
-            
-            bullets.forEach(bullet => {
-                bullet.update();
-                bullet.draw();
-                spawns.forEach(spawn => {
-                    handleCollision(bullet, spawn);
+                stars.forEach(star => {
+                    star.update();
+                    star.draw();
                 })
-            })
+                
+                bullets.forEach(bullet => {
+                    bullet.update();
+                    bullet.draw();
+                    spawns.forEach(spawn => {
+                        handleCollision(bullet, spawn);
+                    })
+                })
 
-            if (spawns.length < 10 + 5 * mapLevel) {
-                spawns.push(new Spawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
-            }
+                if (spawns.length < 10 + 5 * mapLevel) {
+                    spawns.push(new Spawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
+                }
 
-            spawns.forEach(spawn => {
-                spawn.update();
-                spawn.draw();
-                handleCollision(spawn, spaceship);
-            })
+                spawns.forEach(spawn => {
+                    spawn.update();
+                    spawn.draw();
+                    handleCollision(spawn, spaceship);
+                })
 
-            printScore();
+                printScore();
 
-            spaceship.update();
-            spaceship.draw();
-            spaceship.drawHealth();
+                spaceship.update();
+                spaceship.draw();
+                spaceship.drawHealth();
 
-            
-            powerUp?.update();
-            powerUp?.draw();
-            if (powerUp) {
-                handleCollision(spaceship, powerUp);
-            }
+                
+                powerUp?.update();
+                powerUp?.draw();
+                if (powerUp) {
+                    handleCollision(spaceship, powerUp);
+                }
 
-            counter++;
-            if (mouseHold) {
-                mouseHoldCounter++;
-                if (mouseHoldCounter % 10 === 0) {
-                    const bullet = new Bullet(spaceship.x + spaceship.radius, spaceship.y);
-                    bullets.push(bullet);
-                    if (powerUpLevel > 1) {
-                        const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 30 / 360 * Math.PI);
-                        const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
-                        bullets.push(bulletDown, bulletUp);
+                counter++;
+                if (mouseHold) {
+                    mouseHoldCounter++;
+                    if (mouseHoldCounter % 10 === 0) {
+                        const bullet = new Bullet(spaceship.x + spaceship.radius, spaceship.y);
+                        bullets.push(bullet);
+                        if (powerUpLevel > 1) {
+                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 30 / 360 * Math.PI);
+                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
+                            bullets.push(bulletDown, bulletUp);
+                        }
                     }
                 }
-            }
 
-            if (powerUpLevel === 1 && !shieldUp) {
-                for (let i = 0; i < 3; i++) {
-                    const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10);
-                    bullets.push(bullet);
+                if (powerUpLevel === 1 && !shieldUp) {
+                    for (let i = 0; i < 3; i++) {
+                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10);
+                        bullets.push(bullet);
+                    }
+                    shieldUp = true;
                 }
-                shieldUp = true;
-            }
 
-            if (counter >= mapLevelInterval) {
-                mapLevel++;
-                powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
-                counter = 0;
-                mapLevelInterval += 900;
+                if (counter >= mapLevelInterval) {
+                    mapLevel++;
+                    powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
+                    counter = 0;
+                    mapLevelInterval += 900;
+                }
+                score += 0.001 * mapLevel;
+                
+                if (isGameOver) {
+                    isGameOver = false;
+                    setTimeout(() => {
+                        alert("Game Over");
+                        location.reload();
+                    }, 0);
+                    return;
+                }
             }
-            score += 0.001 * mapLevel;
-            
-            if (isGameOver) {
-                isGameOver = false;
-                setTimeout(() => {
-                    alert("Game Over");
-                    location.reload();
-                }, 0);
-                return;
-            }
-
-            setTimeout(requestAnimationFrame(animate), 1000 / 60);
         }
 
         animate();
