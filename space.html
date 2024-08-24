@@ -24,6 +24,7 @@
 
         let bullets = [];
         const stars = [];
+        const blackHoleStars = [];
         const spawns = [];
         let mouseX = 0;
         let mouseY = 0;
@@ -33,7 +34,7 @@
         let counter = 0;
         let mouseHold = false;
         let mouseHoldCounter = 9;
-        let powerUpLevel = 0;
+        let powerUpLevel = 10;
         let shieldUp = false;
         let animationTime = new Date().getTime();
         let fps = 1000 / 60;
@@ -42,6 +43,9 @@
         const omegaBulletRate = 4 * 60;
         let omegaBulletRateCounter = 0;
         const transitionLevel = 7;
+        const blackHoleLevel = 0;
+        let blackHoleUp = false;
+        let blackHole;
 
         let score = 0;
 
@@ -177,6 +181,29 @@
             }
         }
 
+        function BlackHoleStar(x, y, initAngle, speed, distanceFromBlackHole, radius) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.radius = radius;
+            this.distanceFromBlackHole = distanceFromBlackHole;
+            this.angle = initAngle;
+
+            this.update = () => {
+                this.angle += this.speed;
+                this.x = blackHole.x + Math.cos(this.angle) * this.distanceFromBlackHole;
+                this.y = blackHole.y + Math.sin(this.angle) * this.distanceFromBlackHole;
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+                context.fillStyle = "yellow";
+                context.globalAlpha = 1;
+                context.fill();
+            }
+        }
+
         function Bullet(x, y) {
             this.x = x;
             this.y = y;
@@ -298,8 +325,9 @@
                 delete bullets[bullets.indexOf(this)];
             }
 
-            this.remove = () => {
-                // do nothing
+            this.remove = (isBlackhole = false) => {
+                if (!isBlackhole) return;
+                this.removeOmega();
             }
         }
 
@@ -436,6 +464,44 @@
             }
         }
 
+        function BlackHoleSpawn(x, y) {
+            this.x = x;
+            this.y = y;
+            this.speed = 3;
+            this.radius = 200;
+            this.health = 99999;
+
+            this.update = () => {
+                this.x -= this.speed;
+                if (this.x < -this.radius) {
+                    this.remove();
+                }
+            }
+
+            this.draw = () => {
+                context.beginPath();
+                context.arc(this.x, this.y, 40, 0, 2 * Math.PI);
+                context.fillStyle = "black";
+                context.globalAlpha = 1;
+                context.fill();
+                context.strokeStyle = "yellow";
+                context.stroke();
+            }
+
+            this.remove = () => {
+                this.health = 99999;
+                this.x = canvas.width + Math.random() * canvas.width * 0.7;
+                this.y = Math.random() * canvas.height;
+            }
+
+            this.handleHit = (damage) => {
+                this.health -= damage;
+                if (this.health <= 0) {
+                    this.remove();
+                }
+            }
+        }
+
         function PowerUp(x, y) {
             this.x = x;
             this.y = y;
@@ -481,7 +547,7 @@
                 Math.pow(object.y - target.y, 2)
             ) <= target.radius + object.radius) {
                 target.handleHit(object.damage ?? 1);
-                object.remove();
+                object.remove(target instanceof BlackHoleSpawn);
             }
         }
 
@@ -490,6 +556,16 @@
             context.fillStyle = "white";
             context.globalAlpha = 1;
             context.fillText(`Score: ${score.toFixed(2)}`, 10, 20);
+
+            context.font = "bold 17px Courier";
+            context.fillStyle = "white";
+            context.globalAlpha = 1;
+            context.fillText(`Level: ${mapLevel}`, 10, 40);
+
+            context.font = "bold 17px Courier";
+            context.fillStyle = "white";
+            context.globalAlpha = 1;
+            context.fillText(`Powerup Level: ${powerUpLevel}`, 10, 60);
         }
 
         let initSpaceshipPosX = canvas.width * 0.1;
@@ -553,6 +629,20 @@
                     spawns.push(new BulletSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
                     spawns.push(new SuperSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
                 }
+
+                if (mapLevel >= blackHoleLevel && !blackHoleUp) {
+                    blackHole = new BlackHoleSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
+                    spawns.push(blackHole);
+                    for (let i = 0; i < 100; i++) {
+                        blackHoleStars.push(new BlackHoleStar(blackHole.x, blackHole.y, i * 2 * Math.PI / 100, 0.005 + Math.random() * 0.005, 50 + Math.random() * 160, Math.random() * 2 + 1));
+                    }
+                    blackHoleUp = true;
+                }
+
+                blackHoleStars.forEach(star => {
+                    star.update();
+                    star.draw();
+                })
 
                 spawns.forEach(spawn => {
                     spawn.update();
