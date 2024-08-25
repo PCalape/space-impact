@@ -449,6 +449,7 @@
             this.remove = () => {
                 this.alpha = 1;
                 this.health = this.level;
+                this.radius = 50 + (this.level - 1) * 2
                 this.x = canvas.width + Math.random() * canvas.width * 0.7;
                 this.y = Math.random() * canvas.height;
             }
@@ -601,7 +602,117 @@
             mouseHoldCounter = 9;
         });
 
+        function gamePhysics() {
+            bullets.forEach(bullet => {
+                spawns.forEach(spawn => {
+                    handleCollision(bullet, spawn);
+                })
+            })
+
+            if (spawns.length < 10 + 5 * mapLevel && mapLevel <= transitionLevel) {
+                spawns.push(new Spawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, Math.min(mapLevel, transitionLevel)));
+            }
+            if (spawns.length < 10 + 5 * mapLevel && mapLevel > transitionLevel) {
+                spawns.push(new BulletSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
+                spawns.push(new SuperSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
+            }
+
+            if (mapLevel >= blackHoleLevel && !blackHoleUp) {
+                blackHole = new BlackHoleSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
+                spawns.push(blackHole);
+                for (let i = 0; i < 100; i++) {
+                    blackHoleStars.push(new BlackHoleStar(blackHole.x, blackHole.y, i * 2 * Math.PI / 100, 0.005 + Math.random() * 0.005, 50 + Math.random() * 160, Math.random() * 2 + 1));
+                }
+                blackHoleUp = true;
+            }
+
+            spawns.forEach(spawn => {
+                handleCollision(spawn, spaceship);
+            })
+
+            if (powerUp) {
+                handleCollision(spaceship, powerUp);
+            }
+
+            counter++;
+            if (mouseHold) {
+                mouseHoldCounter++;
+                if (mouseHoldCounter % 10 === 0) {
+                    const bullet = new Bullet(spaceship.x + spaceship.radius, spaceship.y);
+                    bullets.push(bullet);
+                    if (powerUpLevel > 1) {
+                        const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 30 / 360 * Math.PI);
+                        const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
+                        bullets.push(bulletDown, bulletUp);
+                    }
+                    if (powerUpLevel > 5) {
+                        const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 60 / 360 * Math.PI);
+                        const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -60 / 360 * Math.PI);
+                        bullets.push(bulletDown, bulletUp);
+                    }
+                    if (powerUpLevel > 6) {
+                        const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 90 / 360 * Math.PI);
+                        const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -90 / 360 * Math.PI);
+                        bullets.push(bulletDown, bulletUp);
+                    }
+                }
+            }
+
+            if (powerUpLevel > 0 && !shieldUp) {
+                for (let i = 0; i < 3; i++) {
+                    const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10, 1);
+                    bullets.push(bullet);
+                }
+                shieldUp = true;
+            }
+
+            if (powerUpLevel > 2 && !upgradedShieldUp) {
+                for (let i = 0; i < 5; i++) {
+                    const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 0.075, 150, 15, 0);
+                    bullets.push(bullet);
+                }
+                upgradedShieldUp = true;
+            }
+
+            if (powerUpLevel > 4 && !lastUpgradedShield) {
+                for (let i = 0; i < 7; i++) {
+                    const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 7, 0.05, 200, 20, 1);
+                    bullets.push(bullet);
+                }
+                lastUpgradedShield = true;
+            }
+
+            if (powerUpLevel > 3) {
+                if (omegaBulletRateCounter % omegaBulletRate === 0) {
+                    omegaBulletRateCounter = 0;
+                    bullets.push(new OmegaBullet());
+                }
+                omegaBulletRateCounter++;
+            }
+
+            if (counter >= mapLevelInterval) {
+                mapLevel++;
+                powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
+                counter = 0;
+                mapLevelInterval += 900;
+            }
+
+            bullets = bullets.filter(bullet => bullet);
+
+            score += 0.001 * mapLevel;
+            
+            if (isGameOver) {
+                isGameOver = false;
+                setTimeout(() => {
+                    alert("Game Over");
+                    location.reload();
+                }, 0);
+                return;
+            }
+        }
+
         function animate() {
+            gamePhysics();
             requestAnimationFrame(animate);
             const now = new Date().getTime();
             const elapsedTime = now - animationTime;
@@ -617,27 +728,7 @@
                 bullets.forEach(bullet => {
                     bullet.update();
                     bullet.draw();
-                    spawns.forEach(spawn => {
-                        handleCollision(bullet, spawn);
-                    })
                 })
-
-                if (spawns.length < 10 + 5 * mapLevel && mapLevel <= transitionLevel) {
-                    spawns.push(new Spawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, Math.min(mapLevel, transitionLevel)));
-                }
-                if (spawns.length < 10 + 5 * mapLevel && mapLevel > transitionLevel) {
-                    spawns.push(new BulletSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
-                    spawns.push(new SuperSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height, mapLevel));
-                }
-
-                if (mapLevel >= blackHoleLevel && !blackHoleUp) {
-                    blackHole = new BlackHoleSpawn(1.3 * canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
-                    spawns.push(blackHole);
-                    for (let i = 0; i < 100; i++) {
-                        blackHoleStars.push(new BlackHoleStar(blackHole.x, blackHole.y, i * 2 * Math.PI / 100, 0.005 + Math.random() * 0.005, 50 + Math.random() * 160, Math.random() * 2 + 1));
-                    }
-                    blackHoleUp = true;
-                }
 
                 blackHoleStars.forEach(star => {
                     star.update();
@@ -647,7 +738,6 @@
                 spawns.forEach(spawn => {
                     spawn.update();
                     spawn.draw();
-                    handleCollision(spawn, spaceship);
                 })
 
                 printScore();
@@ -659,85 +749,6 @@
                 
                 powerUp?.update();
                 powerUp?.draw();
-                if (powerUp) {
-                    handleCollision(spaceship, powerUp);
-                }
-
-                counter++;
-                if (mouseHold) {
-                    mouseHoldCounter++;
-                    if (mouseHoldCounter % 10 === 0) {
-                        const bullet = new Bullet(spaceship.x + spaceship.radius, spaceship.y);
-                        bullets.push(bullet);
-                        if (powerUpLevel > 1) {
-                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 30 / 360 * Math.PI);
-                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -30 / 360 * Math.PI);
-                            bullets.push(bulletDown, bulletUp);
-                        }
-                        if (powerUpLevel > 5) {
-                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 60 / 360 * Math.PI);
-                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -60 / 360 * Math.PI);
-                            bullets.push(bulletDown, bulletUp);
-                        }
-                        if (powerUpLevel > 6) {
-                            const bulletDown = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, 90 / 360 * Math.PI);
-                            const bulletUp = new AngledBullet(spaceship.x + spaceship.radius, spaceship.y, -90 / 360 * Math.PI);
-                            bullets.push(bulletDown, bulletUp);
-                        }
-                    }
-                }
-
-                if (powerUpLevel > 0 && !shieldUp) {
-                    for (let i = 0; i < 3; i++) {
-                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 3, 0.1, 100, 10, 1);
-                        bullets.push(bullet);
-                    }
-                    shieldUp = true;
-                }
-
-                if (powerUpLevel > 2 && !upgradedShieldUp) {
-                    for (let i = 0; i < 5; i++) {
-                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 5, 0.075, 150, 15, 0);
-                        bullets.push(bullet);
-                    }
-                    upgradedShieldUp = true;
-                }
-
-                if (powerUpLevel > 4 && !lastUpgradedShield) {
-                    for (let i = 0; i < 7; i++) {
-                        const bullet = new RotatingBullet(spaceship.x, spaceship.y, i * 2 * Math.PI / 7, 0.05, 200, 20, 1);
-                        bullets.push(bullet);
-                    }
-                    lastUpgradedShield = true;
-                }
-
-                if (powerUpLevel > 3) {
-                    if (omegaBulletRateCounter % omegaBulletRate === 0) {
-                        omegaBulletRateCounter = 0;
-                        bullets.push(new OmegaBullet());
-                    }
-                    omegaBulletRateCounter++;
-                }
-
-                if (counter >= mapLevelInterval) {
-                    mapLevel++;
-                    powerUp = new PowerUp(canvas.width + Math.random() * canvas.width * 0.7, Math.random() * canvas.height);
-                    counter = 0;
-                    mapLevelInterval += 900;
-                }
-
-                bullets = bullets.filter(bullet => bullet);
-
-                score += 0.001 * mapLevel;
-                
-                if (isGameOver) {
-                    isGameOver = false;
-                    setTimeout(() => {
-                        alert("Game Over");
-                        location.reload();
-                    }, 0);
-                    return;
-                }
             }
         }
 
