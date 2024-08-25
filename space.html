@@ -559,16 +559,22 @@
             context.font = "bold 20px Courier";
             context.fillStyle = "white";
             context.globalAlpha = 1;
+            context.textBaseline = 'lower left';
+            context.textAlign = 'left';
             context.fillText(`Score: ${score.toFixed(2)}`, 10, 20);
 
             context.font = "bold 17px Courier";
             context.fillStyle = "white";
             context.globalAlpha = 1;
+            context.textBaseline = 'lower left';
+            context.textAlign = 'left';
             context.fillText(`Level: ${mapLevel}`, 10, 40);
 
             context.font = "bold 17px Courier";
             context.fillStyle = "white";
             context.globalAlpha = 1;
+            context.textBaseline = 'lower left';
+            context.textAlign = 'left';
             context.fillText(`Powerup Level: ${powerUpLevel}`, 10, 60);
         }
 
